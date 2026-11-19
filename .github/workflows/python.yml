@@ -1,0 +1,38 @@
+name: Python
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    name: Lint and Test
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        fetch-depth: 0
+
+    - name: Install Python
+      uses: actions/setup-python@v7
+      with:
+        python-version: '3.13'
+
+    - name: Install Python Deps
+      run: source ci/python.sh && qa_prepare_all
+
+    - name: Lint Device Python
+      shell: bash
+      run: source ci/python.sh && qa_device_check
+
+    - name: Lint Tools
+      shell: bash
+      run: source ci/python.sh && qa_tools_check
+
+    - name: Lint Tests
+      shell: bash
+      run: source ci/python.sh && qa_tests_check
+
+    - name: Run Tests
+      shell: bash
+      run: source ci/python.sh && qa_tests_run
