@@ -20,7 +20,7 @@ A role is a `cdcaux_role_t` (command prefix, dispatch, service, disconnected, so
 ### Framing (owned by the arbiter)
 
 - A message is one JSON object on one line, terminated by `\n`. Lines are at most 1024 bytes.
-- A message may carry a binary payload: the header includes `"bytes": N` and exactly N raw bytes follow the newline. The debugger's `screen` event uses the same convention.
+- A message may carry a binary payload: the header includes `"bytes": N` and exactly N raw bytes follow the newline. The debugger's `screen` event uses the same convention: its header has `width`, `height` and `format`, either `RGBA8888` (bytes R, G, B, A) or `RGB565` (one little-endian 16-bit word per pixel), and the payload is the rows packed without padding. Firmware from before `format` sends RGBA8888 without it.
 - Requests have `"cmd"` and `"id"`. The arbiter handles any `cmd` matching a role prefix (`fs.`, `app.`), whether or not Python has claimed the channel. Other lines go to Python while it holds `cdcaux.claim(True)` (the debugger) and are dropped otherwise.
 - Byte `0x03` outside a payload returns the ident line. Its `features` include `"fs"` and `"app"`.
 - Responses echo `"id"`. Success: `{"event": "<cmd>", "id": ...}` plus fields. Failure: `{"event": "error", "id": ..., "errno": "ENOENT", "message": "..."}`.
