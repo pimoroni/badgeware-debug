@@ -112,6 +112,7 @@ A command that waits (for the mount, or for a pending reset) holds the line buff
 - `mp_sched_vm_abort()` only sets a flag, so the arbiter also schedules itself to make the VM call `mp_handle_pending()`.
 - At an idle REPL there is no abort target, so the arbiter queues Ctrl-D on stdin instead. Either way it switches to the friendly REPL first so `main.py` runs.
 - USB stays enumerated through a soft reset (unless an app activated `machine.USBDevice`), so the host keeps its ports open.
+- Commands wait while a reset is pending, and the reset drops them, except `app.stop`, `fs.lock` and `app.bootloader`, which only change what the app does next and so are taken straight away. A stop or lock also cancels a launch that hasn't started yet, so a stop sent just after a run stops it.
 - `MICROPY_BOARD_END_SOFT_RESET()` calls `cdcaux_soft_reset()`, which clears the claim, buffers, handles and guard, and keeps the held flag, pending launch, pending reply and watch setting in C statics. Static scheduler nodes and static soft timers survive a soft reset by design, so the arbiter's node is never cleared by hand.
 
 ### Memory

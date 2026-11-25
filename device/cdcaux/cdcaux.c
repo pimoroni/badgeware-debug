@@ -325,6 +325,13 @@ static void cdcaux_line_done(void) {
     cdcaux_line_ready = false;
 }
 
+// Commands that only change what the app does next. They are taken while a
+// reset is pending rather than waiting for it, since the reset drops whatever
+// is waiting, and a stop sent just after a run must still stop it.
+static bool cdcaux_ahead_of_reset(const char *cmd) {
+    return strcmp(cmd, "app.stop") == 0 || strcmp(cmd, "fs.lock") == 0 || strcmp(cmd, "app.bootloader") == 0;
+}
+
 static bool cdcaux_route_line(cdcaux_buffers_t *buffers) {
     if (cdcaux_line_overflow) {
         cdcaux_line_overflow = false;
@@ -349,7 +356,7 @@ static bool cdcaux_route_line(cdcaux_buffers_t *buffers) {
         return true;
     }
 
-    if (!cdcaux_fs_ready() || cdcaux_app_reset_pending()) {
+    if (!cdcaux_fs_ready() || (cdcaux_app_reset_pending() && !cdcaux_ahead_of_reset(cmd))) {
         return false;
     }
 

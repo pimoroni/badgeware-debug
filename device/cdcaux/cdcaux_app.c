@@ -126,6 +126,9 @@ static void cdcaux_app_defer_reply(const char *event, mp_obj_t id) {
 }
 
 static void cdcaux_app_hold(const char *event, mp_obj_t id) {
+    // Holding cancels a run that hasn't started yet, or it would start once
+    // the hold ends.
+    app_launch_pending = false;
     if (app_held) {
         cdcaux_app_reply_state(event, id, "held");
         return;
