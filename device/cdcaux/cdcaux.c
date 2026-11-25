@@ -1,5 +1,8 @@
+#include <stdio.h>
 #include <string.h>
 
+#include "pico.h"
+#include "hardware/regs/addressmap.h"
 #include "py/runtime.h"
 #include "py/mphal.h"
 #include "py/stream.h"
@@ -27,10 +30,26 @@
 #define BADGEWARE_VERSION "unknown"
 #endif
 
+// The rp2 port puts the filesystem at the end of flash, with ROMFS just before it.
+#define CDCAUX_FILESYSTEM_BASE (XIP_BASE + PICO_FLASH_SIZE_BYTES - MICROPY_HW_FLASH_STORAGE_BYTES)
+#define CDCAUX_ROMFS_BASE (CDCAUX_FILESYSTEM_BASE - MICROPY_HW_ROMFS_BYTES)
+
+static size_t cdcaux_send(const uint8_t *data, size_t len);
+
 static const char cdcaux_ident[] =
     "{\"ident\": \"badgeware-ide\", \"protocol\": " CDCAUX_PROTOCOL_VERSION
     ", \"model\": \"" BADGEWARE_MODEL "\", \"version\": \"" BADGEWARE_VERSION "\", \"board\": \"" MICROPY_HW_BOARD_NAME
-    "\", \"firmware\": \"" MICROPY_GIT_TAG "\", \"features\": [\"repl\", \"debug\", \"littlefs\", \"fs\", \"app\"]}\n";
+    "\", \"firmware\": \"" MICROPY_GIT_TAG "\", \"features\": [\"repl\", \"debug\", \"littlefs\", \"fs\", \"app\"]";
+
+// Sends the ident line, ending with the flash layout. Only the layout is
+// formatted, on the stack, to keep the ident out of .bss.
+static void cdcaux_send_ident(void) {
+    char flash[64];
+    int len = snprintf(flash, sizeof(flash), ", \"flash\": {\"romfs\": %lu, \"filesystem\": %lu}}\n",
+        (unsigned long)CDCAUX_ROMFS_BASE, (unsigned long)CDCAUX_FILESYSTEM_BASE);
+    cdcaux_send((const uint8_t *)cdcaux_ident, sizeof(cdcaux_ident) - 1);
+    cdcaux_send((const uint8_t *)flash, len);
+}
 
 typedef struct _cdcaux_buffers_t {
     uint8_t line[CDCAUX_LINE_MAX];
@@ -426,7 +445,7 @@ static void cdcaux_process_rx(cdcaux_buffers_t *buffers) {
         }
         uint8_t byte = cdcaux_stage[cdcaux_stage_pos++];
         if (byte == CDCAUX_IDENT_REQUEST) {
-            cdcaux_send((const uint8_t *)cdcaux_ident, sizeof(cdcaux_ident) - 1);
+            cdcaux_send_ident();
         } else if (byte == '\n') {
             cdcaux_line_ready = true;
         } else if (byte != '\r') {
