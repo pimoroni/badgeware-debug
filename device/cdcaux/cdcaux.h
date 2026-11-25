@@ -59,6 +59,7 @@ void cdcaux_fs_state_changed(void);
 extern const mp_obj_type_t cdcaux_block_device_type;
 extern const cdcaux_role_t cdcaux_app_role;
 extern const cdcaux_role_t cdcaux_fs_role;
+extern const cdcaux_role_t cdcaux_mem_role;
 
 MP_DECLARE_CONST_FUN_OBJ_1(cdcaux_app_obj);
 MP_DECLARE_CONST_FUN_OBJ_0(cdcaux_held_obj);

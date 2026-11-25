@@ -39,7 +39,7 @@ static size_t cdcaux_send(const uint8_t *data, size_t len);
 static const char cdcaux_ident[] =
     "{\"ident\": \"badgeware-ide\", \"protocol\": " CDCAUX_PROTOCOL_VERSION
     ", \"model\": \"" BADGEWARE_MODEL "\", \"version\": \"" BADGEWARE_VERSION "\", \"board\": \"" MICROPY_HW_BOARD_NAME
-    "\", \"firmware\": \"" MICROPY_GIT_TAG "\", \"features\": [\"repl\", \"debug\", \"littlefs\", \"fs\", \"app\", \"bootloader\"]";
+    "\", \"firmware\": \"" MICROPY_GIT_TAG "\", \"features\": [\"repl\", \"debug\", \"littlefs\", \"fs\", \"app\", \"bootloader\", \"mem\"]";
 
 // Sends the ident line, ending with the flash layout. Only the layout is
 // formatted, on the stack, to keep the ident out of .bss.
@@ -62,6 +62,7 @@ MP_REGISTER_ROOT_POINTER(struct _cdcaux_buffers_t *cdcaux_buffers);
 static const cdcaux_role_t *const cdcaux_roles[] = {
     &cdcaux_app_role,
     &cdcaux_fs_role,
+    &cdcaux_mem_role,
 };
 
 static bool cdcaux_claimed = false;
