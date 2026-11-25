@@ -660,6 +660,7 @@ static const mp_rom_map_elem_t cdcaux_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_app), MP_ROM_PTR(&cdcaux_app_obj) },
     { MP_ROM_QSTR(MP_QSTR_held), MP_ROM_PTR(&cdcaux_held_obj) },
     { MP_ROM_QSTR(MP_QSTR_release), MP_ROM_PTR(&cdcaux_release_obj) },
+    { MP_ROM_QSTR(MP_QSTR_describe), MP_ROM_PTR(&cdcaux_describe_obj) },
     { MP_ROM_QSTR(MP_QSTR_launch), MP_ROM_PTR(&cdcaux_launch_obj) },
     { MP_ROM_QSTR(MP_QSTR_BlockDevice), MP_ROM_PTR(&cdcaux_block_device_type) },
 };

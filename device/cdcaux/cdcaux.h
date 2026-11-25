@@ -65,5 +65,6 @@ MP_DECLARE_CONST_FUN_OBJ_1(cdcaux_app_obj);
 MP_DECLARE_CONST_FUN_OBJ_0(cdcaux_held_obj);
 MP_DECLARE_CONST_FUN_OBJ_0(cdcaux_release_obj);
 MP_DECLARE_CONST_FUN_OBJ_0(cdcaux_launch_obj);
+MP_DECLARE_CONST_FUN_OBJ_1(cdcaux_describe_obj);
 
 #endif

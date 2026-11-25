@@ -5,6 +5,7 @@ target_sources(usermod_cdcaux INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/cdcaux_app.c
     ${CMAKE_CURRENT_LIST_DIR}/cdcaux_fs.c
     ${CMAKE_CURRENT_LIST_DIR}/cdcaux_mem.c
+    ${CMAKE_CURRENT_LIST_DIR}/cdcaux_describe.c
 )
 
 target_include_directories(usermod_cdcaux INTERFACE
