@@ -204,11 +204,25 @@ def _stop(frame, reason):
         ],
     })
     while not _resume:
+        if not cdcaux.connected():
+            _detach()
+            break
         _poll()
         time.sleep_ms(5)
     _stopped_frames = []
     _refs.clear()
     _send({"event": "continued"})
+
+
+def _detach():
+    # The IDE went away while the app was paused: stop debugging and let the app
+    # run on, so neither it nor the REPL is left waiting on a debugger.
+    global _mode, _resume
+    _breakpoints.clear()
+    _mode = "run"
+    _resume = True
+    sys.settrace(None)
+    cdcaux.claim(False)
 
 
 def _should_stop(frame):
