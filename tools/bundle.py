@@ -76,7 +76,7 @@ def collect_fonts(directory, extension):
 def write_manifests(bundle_dir):
     filesystem = bundle_dir / "filesystem"
     fonts = {
-        "vector": collect_fonts(filesystem / "fonts", ".af"),
+        "vector": collect_fonts(filesystem / "rom" / "fonts", ".af"),
         "pixel": collect_fonts(filesystem / "rom" / "fonts", ".ppf"),
     }
     (bundle_dir / "fonts-manifest.json").write_text(json.dumps(fonts, indent=2) + "\n")

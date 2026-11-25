@@ -17,7 +17,7 @@ The tool replaces only the entries below in `--output`.
 |---|---|
 | `filesystem/` | The firmware filesystem in the badge's flat layout |
 | `filesystem.json` | `{"files": {"/<path>": size}}` for every file in `filesystem/` |
-| `fonts-manifest.json` | `{"vector": [...], "pixel": [...]}`: `.af` files in `filesystem/fonts`, `.ppf` files in `filesystem/rom/fonts` |
+| `fonts-manifest.json` | `{"vector": [...], "pixel": [...]}`: `.af` and `.ppf` files in `filesystem/rom/fonts` |
 | `frozen/` | The source of every frozen module, by frozen path |
 | `frozen.json` | `{"files": [...]}`: frozen paths, board modules first, then the badgeware-debug runtime |
 | `bundle.json` | Provenance: `board`, `commit` and `version` of the board repo, and `debug.commit` and `debug.version` of badgeware-debug |

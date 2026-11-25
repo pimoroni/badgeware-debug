@@ -19,6 +19,7 @@ BOARD_FILES = {
     "modules/common/empty.py": "",
     "modules/python/hardware_test.py": "value = 1\n",
     "romfs/fonts/sins.ppf": "ppf",
+    "romfs/fonts/lexend.af": "af",
     "board/pins.csv": "pins",
 }
 
@@ -56,10 +57,10 @@ class BundleTest(unittest.TestCase):
     def test_bundle(self):
         provenance, files = bundle.bundle("tufty", self.repo, "HEAD", self.output)
         filesystem = json.loads((self.output / "filesystem.json").read_text())["files"]
-        self.assertEqual(sorted(filesystem), ["/apps/menu/__init__.py", "/assets/x.png", "/badgeware/__init__.py", "/fonts/a.af", "/rom/fonts/sins.ppf"])
-        self.assertEqual(files, 5)
+        self.assertEqual(sorted(filesystem), ["/apps/menu/__init__.py", "/assets/x.png", "/badgeware/__init__.py", "/fonts/a.af", "/rom/fonts/lexend.af", "/rom/fonts/sins.ppf"])
+        self.assertEqual(files, 6)
         self.assertEqual((self.output / "filesystem" / "badgeware" / "__init__.py").read_text(), '__import__("badgeware/badge")\n')
-        self.assertEqual(json.loads((self.output / "fonts-manifest.json").read_text()), {"vector": ["a.af"], "pixel": ["sins.ppf"]})
+        self.assertEqual(json.loads((self.output / "fonts-manifest.json").read_text()), {"vector": ["lexend.af"], "pixel": ["sins.ppf"]})
 
         frozen = json.loads((self.output / "frozen.json").read_text())["files"]
         self.assertEqual(frozen[:4], ["hardware_test.py", "badgeware/__init__.py", "empty.py", "ide_display.py"])
