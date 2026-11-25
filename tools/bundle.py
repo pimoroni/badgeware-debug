@@ -26,7 +26,7 @@ REWRITES = [
 
 BOARD_FROZEN_ROOTS = ["modules/python", "modules/common"]
 
-OUTPUTS = ["filesystem", "frozen", "filesystem.json", "fonts-manifest.json", "frozen.json", "bundle.json"]
+OUTPUTS = ["filesystem", "frozen", "filesystem.json", "fonts-manifest.json", "frozen.json", "locals.json", "bundle.json"]
 
 
 def source_paths():
@@ -95,6 +95,20 @@ def frozen_sources(source):
             yield path, path.relative_to(base).as_posix()
 
 
+def write_locals(sources, mpy_cross, output):
+    tables = {}
+    with tempfile.TemporaryDirectory() as temp:
+        compiled = pathlib.Path(temp) / "module.mpy"
+        names = pathlib.Path(temp) / "locals.json"
+        for path, frozen in sources:
+            subprocess.run([mpy_cross, "-s", frozen, "-o", str(compiled), "--locals", str(names), str(path)], check=True)
+            functions = json.loads(names.read_text())["functions"]
+            if functions:
+                tables[frozen] = functions
+    (output / "locals.json").write_text(json.dumps(tables, indent=1, sort_keys=True) + "\n")
+    return len(tables)
+
+
 def copy_frozen(sources, output):
     files = []
     for path, frozen in sources:
@@ -132,7 +146,7 @@ def clear(output):
             path.unlink()
 
 
-def bundle(board, repo, ref, output):
+def bundle(board, repo, ref, output, mpy_cross):
     output.mkdir(parents=True, exist_ok=True)
     clear(output)
     with tempfile.TemporaryDirectory() as temp:
@@ -142,8 +156,9 @@ def bundle(board, repo, ref, output):
         files = write_manifests(output)
         sources = list(frozen_sources(source))
         copy_frozen(sources, output)
+        tables = write_locals(sources, mpy_cross, output)
     provenance = write_provenance(repo, ref, board, output)
-    return provenance, files
+    return provenance, files, tables
 
 
 def main():
@@ -152,10 +167,11 @@ def main():
     parser.add_argument("repo", type=pathlib.Path, help="firmware git repository, eg: ../badger2350")
     parser.add_argument("ref", nargs="?", default="HEAD", help="git ref to bundle")
     parser.add_argument("--output", type=pathlib.Path, required=True, help="bundle directory to write")
+    parser.add_argument("--mpy-cross", required=True, help="mpy-cross with --locals support")
     args = parser.parse_args()
 
-    provenance, files = bundle(args.board, args.repo, args.ref, args.output)
-    print(f"{args.board}: bundled {args.repo} {args.ref} ({provenance['version']}) with badgeware-debug {provenance['debug']['version']} into {args.output}, {files} files")
+    provenance, files, tables = bundle(args.board, args.repo, args.ref, args.output, args.mpy_cross)
+    print(f"{args.board}: bundled {args.repo} {args.ref} ({provenance['version']}) with badgeware-debug {provenance['debug']['version']} into {args.output}, {files} files, {tables} locals tables")
     return 0
 
 
