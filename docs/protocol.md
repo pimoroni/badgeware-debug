@@ -84,11 +84,11 @@ Reads are always allowed and see the last committed version of a file.
 
 | Command | Fields | Reply |
 |---|---|---|
-| `mem.heap` | | `block` (bytes per GC block), `areas` of `{table, table_bytes, pool, pool_bytes, last_used_block}` |
+| `mem.heap` | | `block` (bytes per GC block), `areas` of `{table, table_bytes, pool, pool_bytes, last_used_block}`, `regions` of `flash`, `psram` and `sram` as `[base, size]` (PSRAM size 0 without PSRAM) |
 | `mem.read` | `address`, `length` (max `chunk`) | `bytes` raw bytes |
 
 - `mem.heap` costs nothing on the badge: a host reads each area's allocation table with `mem.read` and decodes it, 2 bits per block (0 free, 1 head, 2 tail, 3 marked), instead of the badge walking the heap as `gc.mem_free()` does.
-- `mem.read` reads SRAM, the flash window or a heap area (tables and pool, which may be in PSRAM). Other addresses could fault, so they fail with `EINVAL`. The bytes are sent straight from memory, so a read races whatever is running.
+- `mem.read` reads SRAM, flash, PSRAM or a heap area. Other addresses could fault, so they fail with `EINVAL`. The bytes are sent straight from memory, so a read races whatever is running.
 
 ### errno values
 

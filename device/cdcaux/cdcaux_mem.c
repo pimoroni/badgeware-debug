@@ -10,6 +10,9 @@
 #include "py/mpstate.h"
 #include "pico.h"
 #include "hardware/regs/addressmap.h"
+#if MICROPY_HW_ENABLE_PSRAM
+#include "hardware/psram.h"
+#endif
 #include "cdcaux.h"
 
 #if MICROPY_HW_USB_CDC_AUX
@@ -20,17 +23,29 @@
 #define MEM_NEXT_AREA(area) (NULL)
 #endif
 
-// SRAM, the flash window and the heap areas (which may be in PSRAM) can be
-// read. Anything else could fault, so it is refused.
+#if MICROPY_HW_ENABLE_PSRAM
+extern uint8_t __psram_start__;
+#define MEM_PSRAM_BASE ((uintptr_t)&__psram_start__)
+#define MEM_PSRAM_SIZE (psram_get_size())   // 0 if PSRAM wasn't brought up
+#else
+#define MEM_PSRAM_BASE (0)
+#define MEM_PSRAM_SIZE (0)
+#endif
+
+static bool mem_within(uintptr_t address, uintptr_t end, uintptr_t base, size_t size) {
+    return address >= base && end <= base + size;
+}
+
+// SRAM, flash, PSRAM and the heap areas can be read. Anything else could
+// fault, so it is refused.
 static bool mem_readable(uintptr_t address, size_t length) {
     uintptr_t end = address + length;
     if (end < address) {
         return false;
     }
-    if (address >= SRAM_BASE && end <= SRAM_END) {
-        return true;
-    }
-    if (address >= XIP_BASE && end <= XIP_BASE + PICO_FLASH_SIZE_BYTES) {
+    if (mem_within(address, end, SRAM_BASE, SRAM_END - SRAM_BASE)
+        || mem_within(address, end, XIP_BASE, PICO_FLASH_SIZE_BYTES)
+        || (MEM_PSRAM_SIZE && mem_within(address, end, MEM_PSRAM_BASE, MEM_PSRAM_SIZE))) {
         return true;
     }
     for (const mp_state_mem_area_t *area = &MP_STATE_MEM(area); area != NULL; area = MEM_NEXT_AREA(area)) {
@@ -55,7 +70,10 @@ static void mem_heap(mp_obj_t id) {
             (unsigned int)area->gc_last_used_block);
         first = false;
     }
-    mp_printf(&reply.print, "]");
+    mp_printf(&reply.print, "], \"regions\": {\"flash\": [%u, %u], \"psram\": [%u, %u], \"sram\": [%u, %u]}",
+        (unsigned int)XIP_BASE, (unsigned int)PICO_FLASH_SIZE_BYTES,
+        (unsigned int)MEM_PSRAM_BASE, (unsigned int)MEM_PSRAM_SIZE,
+        (unsigned int)SRAM_BASE, (unsigned int)(SRAM_END - SRAM_BASE));
     cdcaux_reply_send(&reply, NULL, 0);
 }
 
