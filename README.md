@@ -26,12 +26,12 @@ cmake ... -DBADGEWARE_DEBUG_DIR=/path/to/badgeware-debug
 
 See [board integration](docs/runtime.md#board-integration). Board CI clones a pinned version; set `BADGEWARE_DEBUG_DIR` before sourcing `ci/micropython.sh` to build against a local checkout.
 
-The MicroPython side (the aux CDC interface, settrace local naming and `mpy-cross --locals`) is in the pimoroni/micropython fork, branch `bw-1.29.0-ide`.
+The MicroPython side (the aux CDC interface, and settrace local names for source and frozen code) is in the pimoroni/micropython fork, branch `bw-1.29.0-ide`.
 
 ## Tools
 
 ```sh
-tools/bundle.py tufty ../tufty2350 --output build/tufty-bundle --mpy-cross ../micropython/mpy-cross/build/mpy-cross
+tools/bundle.py tufty ../tufty2350 --output build/tufty-bundle
 pip install -r tools/requirements.txt
 python3 tools/fsclient.py info
 python3 tools/fsclient.py test
