@@ -39,7 +39,7 @@ static size_t cdcaux_send(const uint8_t *data, size_t len);
 static const char cdcaux_ident[] =
     "{\"ident\": \"badgeware-ide\", \"protocol\": " CDCAUX_PROTOCOL_VERSION
     ", \"model\": \"" BADGEWARE_MODEL "\", \"version\": \"" BADGEWARE_VERSION "\", \"board\": \"" MICROPY_HW_BOARD_NAME
-    "\", \"firmware\": \"" MICROPY_GIT_TAG "\", \"features\": [\"repl\", \"debug\", \"littlefs\", \"fs\", \"app\"]";
+    "\", \"firmware\": \"" MICROPY_GIT_TAG "\", \"features\": [\"repl\", \"debug\", \"littlefs\", \"fs\", \"app\", \"bootloader\"]";
 
 // Sends the ident line, ending with the flash layout. Only the layout is
 // formatted, on the stack, to keep the ident out of .bss.

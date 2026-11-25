@@ -12,6 +12,10 @@
 #define CDCAUX_LEASE_MS (10000)
 #define CDCAUX_CTRL_D (0x04)
 #define CDCAUX_ID_MAX (48)
+#define CDCAUX_BOOTLOADER_REPLY_MS (50)
+
+// machine.bootloader(), callable from C so it works whatever Python is doing.
+MP_NORETURN void mp_machine_bootloader(size_t n_args, const mp_obj_t *args);
 
 static bool app_held = false;
 static mp_uint_t app_last_request_ms = 0;
@@ -162,6 +166,12 @@ static void cdcaux_app_run(mp_obj_t request, mp_obj_t id) {
     cdcaux_app_request_reset();
 }
 
+static void cdcaux_app_bootloader(mp_obj_t id) {
+    cdcaux_reply_ok("app.bootloader", id);
+    mp_hal_delay_ms(CDCAUX_BOOTLOADER_REPLY_MS);
+    mp_machine_bootloader(0, NULL);
+}
+
 static bool cdcaux_app_dispatch(const char *cmd, mp_obj_t request, mp_obj_t id, const uint8_t *payload, size_t payload_len) {
     (void)payload;
     (void)payload_len;
@@ -173,6 +183,8 @@ static bool cdcaux_app_dispatch(const char *cmd, mp_obj_t request, mp_obj_t id, 
         cdcaux_app_unlock(request, id);
     } else if (strcmp(cmd, "app.run") == 0) {
         cdcaux_app_run(request, id);
+    } else if (strcmp(cmd, "app.bootloader") == 0) {
+        cdcaux_app_bootloader(id);
     } else {
         return false;
     }
